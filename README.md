@@ -1,56 +1,72 @@
-# Welcome to your Expo app 👋
+# Mini Shopping App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Expo SDK 57, JavaScript, một màn hình, không backend/API thật.
 
-## Get started
+## Cài đặt và chạy
 
-1. Install dependencies
-
-   ```bash
-   npm install
-   ```
-
-2. Start the app
-
-   ```bash
-   npx expo start
-   ```
-
-In the output, you'll find options to open the app in a
-
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
-
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
-
-## Get a fresh project
-
-When you're ready, run:
+Yêu cầu Node.js 22.13 trở lên.
 
 ```bash
-npm run reset-project
+npm ci
+npx expo start
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Quét QR bằng Expo Go hỗ trợ SDK 57 trên điện thoại cùng mạng. Nhấn `a` để mở Android emulator đã cài hoặc `w` để mở web. Windows không có iOS Simulator.
 
-### Other setup steps
+Redux đã có trong package.json. Lệnh cài package:
 
-- To set up ESLint for linting, run `npx expo lint`, or follow our guide on ["Using ESLint and Prettier"](https://docs.expo.dev/guides/using-eslint/)
-- If you'd like to set up unit testing, follow our guide on ["Unit Testing with Jest"](https://docs.expo.dev/develop/unit-testing/)
-- Learn more about the TypeScript setup in this template in our guide on ["Using TypeScript"](https://docs.expo.dev/guides/typescript/)
+```bash
+npx expo install @reduxjs/toolkit react-redux
+```
 
-## Learn more
+Kiểm tra:
 
-To learn more about developing your project with Expo, look at the following resources:
+```bash
+npx expo lint
+npx tsc --noEmit
+npx expo export --platform all
+```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Xem [SOURCE_CODE.md](./SOURCE_CODE.md) để đọc toàn bộ cây thư mục và nội dung đầy đủ từng file ứng dụng.
 
-## Join the community
+## Vai trò từng file
 
-Join our community of developers creating universal apps.
+| File | Vai trò |
+| --- | --- |
+| index.js | Đăng ký App với Expo. |
+| App.js | Bọc màn hình bằng Redux Provider, ThemeProvider, SafeAreaProvider. |
+| src/screens/DemoScreen.js | Sản phẩm mẫu; useState cho searchText/showInfo; dispatch thêm vào cart. |
+| src/components/CheckoutForm.js | useReducer với 4 field và 5 action; hiển thị state trực tiếp. |
+| src/components/Cart.js | useSelector đọc cart, useDispatch xóa; tính tổng số lượng và tiền. |
+| src/context/ThemeContext.js | ThemeContext, ThemeProvider, useTheme và toggleTheme. |
+| src/redux/store.js | Tạo store chứa cart reducer. |
+| src/redux/cartSlice.js | addItem, removeItem, clearCart. |
+| src/styles.js | StyleSheet chung; từng component lấy màu qua useTheme. |
+| app.json | Cấu hình Expo. |
+| package.json / package-lock.json | Package, scripts và khóa dependency. |
+| eslint.config.js | Cấu hình lint Expo. |
+| tsconfig.json | Kiểm tra JavaScript bằng allowJs/checkJs; mã ứng dụng không dùng TypeScript. |
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Quy ước demo
+
+- useState giữ UI state cục bộ. Danh sách lọc được tính từ searchText.
+- useReducer quản lý checkout, không quản lý cart. Form chỉ minh họa nhập liệu, không gửi đơn hàng.
+- Context chia sẻ theme không cần truyền props. ThemeProvider dùng useState nội bộ để giữ theme.
+- Redux quản lý cart. Thêm trùng sản phẩm tăng quantity; Remove xóa cả dòng. Total Items cộng quantity, Total Price cộng price × quantity, đơn vị USD.
+- State không lưu lâu dài; khởi động lại app sẽ trở về mặc định.
+
+## Demo flow khi thuyết trình
+
+1. **Demo useState:** nhập mouse → chỉ còn Mouse. Nhập xyz → không có kết quả. Xóa tìm kiếm; nhấn Hiện/Ẩn thông tin. Giải thích setter cập nhật state cục bộ rồi UI render lại.
+2. **Demo useReducer:** nhập họ tên, địa chỉ, chọn Chuyển khoản, nhập ghi chú. Quan sát JSON state. Nhấn Reset Form để đặt lại cả bốn field. Giải thích dispatch(action) → checkoutReducer → state mới.
+3. **Demo Context API:** nhấn Toggle Theme. Toàn bộ màn hình, Cart và Checkout Form đổi màu, dữ liệu vẫn giữ nguyên. Chỉ ra useTheme trong component con không nhận theme qua props.
+4. **Demo Redux Toolkit:** thêm Laptop hai lần và Mouse một lần → Total Items: 3, Total Price: $3050. Remove Laptop → còn 1 item, $50. Clear cart → 0 item, $0. Giải thích dispatch(addItem(product)) → cartSlice reducer → Redux Store → useSelector → UI.
+
+## Kết luận để nói
+
+“Không có công cụ state management tốt nhất cho mọi trường hợp. Công cụ nên được chọn theo độ phức tạp và phạm vi của state.”
+
+## Tham khảo
+
+- [Expo SDK 57](https://docs.expo.dev/versions/v57.0.0/)
+- [Redux Toolkit Quick Start](https://redux-toolkit.js.org/tutorials/quick-start)
